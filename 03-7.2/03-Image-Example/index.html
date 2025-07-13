@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>DataVis_Practice_02</title>
+</head>
+<body>
+
+<!-- 一张画布，两张图 -->
+<canvas id="canvas05" width="690" height="457" style="border:1px solid #c3c3c3; margin-right: 10px;"></canvas>
+<canvas id="canvas06" width="564" height="374" style="border:1px solid #c3c3c3;"></canvas>
+
+<script src="d3.v3.min.js"></script>
+<script type="text/javascript">
+
+var img05 = new Image();
+img05.src = 'images/05.jpg';
+img05.onload=function(){
+	var context = document.getElementById('canvas05').getContext('2d', { willReadFrequently: true }); // FIXED
+
+	context.drawImage(img05, 0, 0, 690, 457);
+	// data中保存了图片所有像素的颜色信息，每个像素的RGBA信息占数组中4位
+	// RGBA为像素的红色、绿色、蓝色、透明度四个分量
+	var imageData = context.getImageData(0, 0, 690, 457);
+	var data = imageData.data;
+
+	// 输出05.jpg中(100, 100)像素的颜色值
+	var x = 98;
+	var y = 66;
+	var index = (y * 690 + x) * 4;
+	var r = data[index];
+	var g = data[index + 1];
+	var b = data[index + 2];
+	var a = data[index + 3];
+	console.log(`05.jpg 在 (${x},${y}) 像素的颜色值 RGBA:`, [r, g, b, a]);
+
+	// 计算整张图的RGB颜色均值
+	var rSum = 0, gSum = 0, bSum = 0;
+	var pixelCount = 690 * 457;
+	for (var i = 0; i < data.length; i += 4) {
+		rSum += data[i];
+		gSum += data[i + 1];
+		bSum += data[i + 2];
+	}
+	var rAvg = Math.round(rSum / pixelCount);
+	var gAvg = Math.round(gSum / pixelCount);
+	var bAvg = Math.round(bSum / pixelCount);
+	console.log("05.jpg 图片颜色均值: R=" + rAvg + ", G=" + gAvg + ", B=" + bAvg);
+};
+
+var img06 = new Image();
+img06.src = 'images/06.jpg';
+img06.onload=function(){
+	var context = document.getElementById('canvas06').getContext('2d'); // FIXED
+	context.drawImage(img06, 0, 0, 564, 374); // 绘制在 canvas06 的位置
+
+	var data = context.getImageData(0, 0, 564, 374).data;
+
+
+};
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<div id="container"></div>
+<script src="d3.v7.js"></script>
+<script type="module">
+
+// Declare the chart dimensions and margins.
+const width = 640;
+const height = 400;
+const marginTop = 20;
+const marginRight = 20;
+const marginBottom = 30;
+const marginLeft = 40;
+
+var aapl=[
+  { date: new Date("2023-01-01"), close: 93.24 },
+  { date: new Date("2023-02-01"), close: 63.24 },
+  { date: new Date("2023-03-01"), close: 103.24 },
+  { date: new Date("2023-04-01"), close: 85.66 },
+  { date: new Date("2023-05-01"), close: 75.23 },
+  { date: new Date("2023-06-01"), close: 95.80 },
+  { date: new Date("2023-07-01"), close: 80.20 },
+  { date: new Date("2023-08-01"), close: 98.40 },
+  { date: new Date("2023-09-01"), close: 87.70 },
+  { date: new Date("2023-10-01"), close: 92.10 },
+  { date: new Date("2023-11-01"), close: 97.55 },
+  { date: new Date("2023-12-01"), close: 101.35 }
+] 
+
+// Declare the x (horizontal position) scale.
+const x = d3.scaleUtc()
+    .domain([new Date("2023-01-01"), new Date("2024-01-01")])
+    .range([marginLeft, width - marginRight]);
+
+// Declare the y (vertical position) scale.
+const y = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height - marginBottom, marginTop]);
+
+const line = d3.line()
+      .x(d => x(d.date))
+      .y(d => y(d.close));
+
+
+// Create the SVG container.
+const svg = d3.create("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+// Add the x-axis.
+svg.append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(d3.axisBottom(x));
+
+// Add the y-axis.
+svg.append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(d3.axisLeft(y));
+
+// Append the SVG element.
+container.append(svg.node());
+
+svg.append("path")
+  .datum(aapl)
+  .attr("fill", "none")
+  .attr("stroke", "steelblue")
+  .attr("stroke-width", 2)
+  .attr("d", line);
+
+Plot.plot({
+  y: {grid: true, label: "Daily close ($)"},
+  marks: [
+    Plot.ruleY([0]),
+    Plot.lineY(aapl, {x: "date", y: "close", stroke: "steelblue"})
+  ]
+})
+
+</script>

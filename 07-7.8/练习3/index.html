@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>上海疫情数据热力图</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="http://chenhui.li/courses/infovis2025/d3.v3.min.js"></script>
+
+  <script>
+    //地图中心上海层级11
+    var map = L.map('map').setView([31.23, 121.47], 11);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    d3.json("05-Covid-SH.json", function(error, data) {
+      if (error) {
+        console.error("数据加载失败:", error);
+        alert("数据加载失败，请用 HTTP 服务器打开页面");
+        return;
+      }
+
+      //把data里的每个点提取成[lat, lng]数组，leaflet-heat 需要的格式
+      const latlngs = data.map(item => [item.lat, item.lng]);
+
+      //创建热力图图层，radius是核半径，数值越大热力影响范围越广
+      var heat = L.heatLayer(latlngs, {
+        radius: 20,  //核半径
+        blur: 15,    //模糊度
+        maxZoom: 17, //最大缩放级别时热力图最大强度
+      }).addTo(map);
+    });
+  </script>
+</body>
+</html>

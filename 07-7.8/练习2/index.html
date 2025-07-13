@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>上海疫情数据</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="http://chenhui.li/courses/infovis2025/d3.v3.min.js"></script>
+
+  <script>
+    //初始化地图
+    var map = L.map('map').setView([31.23, 121.47], 11);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    d3.json("05-Covid-SH.json", function(error, data) {
+      if (error) {
+        console.error("数据加载失败:", error);
+        alert("数据加载失败，请用 HTTP 服务器打开页面");
+        return;
+      }
+
+      for (let i = 0; i < data.length; i++) {
+        let pt = data[i];
+        if (pt.lat && pt.lng) {
+          L.circleMarker([pt.lat, pt.lng], {
+            radius: 4,
+            fillColor: '#f03',
+            color: '#fff',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map).bindPopup("时间：" + pt.time);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

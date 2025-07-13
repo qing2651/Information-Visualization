@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>空气质量动态热力图</title>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+
+  <!-- Leaflet & heat -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+  const map = L.map('map').setView([35, 115], 5);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+  let heatLayer = L.heatLayer([], {
+    radius: 25,
+    blur: 20,
+    maxZoom: 8,
+    gradient: {
+      0.1: 'green',
+      0.3: 'yellow',
+      0.5: 'orange',
+      0.7: 'red',
+      1.0: 'darkred'
+    }
+  }).addTo(map);
+
+  const files = ['t0.csv', 't1.csv', 't2.csv', 't3.csv'];
+  let datasets = [];
+  let curIndex = 0;
+  let allLoaded = 0;
+
+  // 加载所有数据
+  files.forEach((file, i) => {
+    d3.csv(file).then(data => {
+      const heatData = data.map(d => {
+        const lat = +d.lan;
+        const lng = +d.lng;
+        const aqi = Math.min(+d.aqi, 300); 
+        const intensity = aqi / 300; // normalize 0-1
+        return [lat, lng, intensity];
+      });
+
+      datasets[i] = heatData;
+      allLoaded++;
+
+      //数据加载完成后开始动画
+      if (allLoaded === files.length) {
+        setInterval(() => {
+          heatLayer.setLatLngs(datasets[curIndex]);
+          curIndex = (curIndex + 1) % datasets.length;
+        }, 1000);
+      }
+    });
+  });
+</script>
+</body>
+</html>

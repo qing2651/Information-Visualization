@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>InfoVis_Practice_02</title>
+	<style>
+		html, body {
+		  height: 100%;
+		  margin: 0;
+		  padding: 0;
+		}
+		#container {
+		  height: 90vh; /* 或 height: 100%; */
+		}
+	  </style>
+</head>
+<!-- 载入D3库 -->
+<script src="d3.v3.min.js"></script>
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script type="text/javascript">
+
+	// 练习1文件操作示例代码
+	d3.csv("02-AQIData.csv", function(data) {
+		//此文件载入操作是异步，以下代码在文件完全载入后触发
+		console.log(data);
+
+		data.forEach(function(d) {
+        d.aqi = +d.aqi;
+        d.id = +d.id;
+		});
+
+		// 排序并取前十
+		const top10 = data.sort((a, b) => b.aqi - a.aqi).slice(0, 10);
+
+		// 提取 id 和 aqi 为两个数组
+		const top10_ids = top10.map(d => d.id);
+		const top10_aqis = top10.map(d => d.aqi);
+
+		console.log("Top 10 IDs:", top10_ids);
+		console.log("Top 10 AQIs:", top10_aqis);
+
+		
+
+		var dom = document.getElementById('container');
+		var myChart = echarts.init(dom, null, {
+		renderer: 'canvas',
+		useDirtyRect: false
+		});
+		var app = {};
+		
+		var option;
+
+		option = {
+			xAxis: {
+				type: 'category',
+				data: top10_ids
+			},
+			yAxis: {
+				type: 'value'
+			},
+			series: [
+				{
+				data: top10_aqis,
+				type: 'line'
+				}
+			]
+			};
+
+		if (option && typeof option === 'object') {
+		myChart.setOption(option);
+		}
+
+		window.addEventListener('resize', myChart.resize);
+
+
+		});
+
+</script>
+<body style="height: 100%; margin: 0">
+	<div id="container" style="height: 100%"></div>
+</body>
+</html>

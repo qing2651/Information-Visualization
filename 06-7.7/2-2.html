@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>词频折线图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    #chart {
+      width: 1000px;
+      height: 600px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+
+  <script>
+    // 先定义异步读取本地JSON文件函数
+    async function loadData() {
+      const response = await fetch('word_freq.json');
+      const data = await response.json();
+      return data;
+    }
+
+    loadData().then(wordFreq => {
+      const words = wordFreq.map(item => item[0]);
+      const freqs = wordFreq.map(item => item[1]);
+
+      var chartDom = document.getElementById('chart');
+      var myChart = echarts.init(chartDom);
+      var option = {
+        title: {
+          text: '词频大于3的词折线图',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          type: 'category',
+          data: words,
+          axisLabel: {
+            interval:0,
+            rotate: 45
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '词频'
+        },
+        series: [{
+          data: freqs,
+          type: 'line',
+          smooth: true,
+          lineStyle: {
+            width: 3
+          }
+        }]
+      };
+
+      myChart.setOption(option);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8" />
+    <title>空气质量散点图</title>
+</head>
+<body style="height: 100%; margin: 0">
+    <div id="container" style="height: 100%"></div>
+    <script src="echarts.min.js"></script>
+    <script src="echarts-gl.min.js"></script>
+    <script src="ecStat.min.js"></script>
+    <script src="dataTool.min.js"></script>
+    <script src="d3.v3.min.js"></script>
+
+    <script>
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+
+        d3.csv("02-AQIData.csv", function(data) {
+            console.log("加载的第一条数据：", data[0]);
+
+            //转换成数字，并提取需要的字段
+            var items = data.map(function(d) {
+                return {
+                    lng: +d["lng"],  //经度
+                    lat: +d["lan"],  //纬度
+                    aqi: +d["aqi"]
+                };
+            });
+
+            //找出aqi最大最小值
+            var aqiList = items.map(d => d.aqi);
+            var aqiMin = Math.min.apply(null, aqiList);
+            var aqiMax = Math.max.apply(null, aqiList);
+
+            //映射函数：aqi值映射成散点大小
+            function mapAQIToSize(aqi) {
+                return 10 + 90 * (aqi - aqiMin) / (aqiMax - aqiMin);
+            }
+
+            //根据aqi值映射颜色
+            function mapAQIToColor(aqi) {
+            if (aqi <= 50) return '#00e400';       // 优，绿色
+            else if (aqi <= 100) return '#ffff00'; // 良，黄色
+            else if (aqi <= 150) return '#ff7e00'; // 轻度污染，橙色
+            else if (aqi <= 200) return '#ff0000'; // 中度污染，红色
+            else if (aqi <= 300) return '#99004c'; // 重度污染，紫色
+            else return '#7e0023';                  // 严重污染，深红色
+            }
+
+
+            //生成echarts的散点数据格式 [经度, 纬度, 映射大小]
+            var scatterData = items.map(d => [d.lng, d.lat, mapAQIToSize(d.aqi)]);
+            
+            var option = {
+                title: {
+                    text: "空气质量散点图（点大小代表AQI）",
+                    left: "center"
+                },
+                tooltip: {
+                    formatter: function(params) {
+                        return `经度: ${params.value[0]}<br>纬度: ${params.value[1]}<br>AQI映射值: ${params.value[2].toFixed(1)}`;
+                    }
+                },
+                xAxis: { name: "经度" },
+                yAxis: { name: "纬度" },
+                series: [{
+                    type: "scatter",
+                    data: scatterData,
+                    symbolSize: function(val) {
+                        return val[2];
+                    },
+                    itemStyle: {
+                        color: function(params) {
+                            var aqi = items[params.dataIndex].aqi;
+                            return mapAQIToColor(aqi);
+                        }
+                    }
+                }]
+            };
+            myChart.setOption(option);
+        });
+    </script>
+</body>
+</html>
+

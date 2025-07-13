@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>图片颜色聚类可视化</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <!-- QueryUI样式库 -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/cupertino/jquery-ui.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+</head>
+<body>
+
+<h1>颜色聚类图</h1>
+
+<div id="control-panel" style="width: 500px;">
+  <h3>参数设置</h3>
+  <div>
+    <p>
+      <label for="imageSelect">选择图片：</label>
+      <select id="imageSelect">
+        <option value="01.jpg">01.jpg</option>
+        <option value="02.jpg">02.jpg</option>
+        <option value="03.jpg">03.jpg</option>
+        <option value="04.jpg">04.jpg</option>
+        <option value="05.jpg">05.jpg</option>
+        <option value="06.jpg">06.jpg</option>
+        <option value="07.jpg">07.jpg</option>
+      </select>
+    </p>
+    <p>
+      <label for="kValue">聚类数 K：</label>
+      <input type="number" id="kValue" value="5" min="2" max="20" style="width:50px;" />
+    </p>
+    <p>
+      <label for="chartType">图表类型：</label>
+      <select id="chartType">
+        <option value="pie">饼图</option>
+        <option value="bar">柱状图</option>
+        <option value="radar">雷达图</option>
+      </select>
+    </p>
+    <button id="analyzeBtn">分析</button>
+  </div>
+</div>
+
+<br><br>
+<canvas id="canvas" width="690" height="457" style="border:1px solid #ccc;"></canvas>
+<p id="resultHint" style="font-weight: bold; color: green; display: none;">下图为聚类后的图像效果</p>
+
+<div id="chart" style="width:600px; height:400px; margin-top:20px;"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
+

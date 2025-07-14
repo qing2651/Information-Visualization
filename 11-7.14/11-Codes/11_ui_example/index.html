@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Menu Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="external/cssmenu/cssmenu.css" />
+    <link rel="stylesheet" href="external/jquery/jquery-ui-1.10.4.custom.min.css" />
+
+    <script src="lib/GCommonFuncUtility.js"></script>
+    <script src="lib/MsgManager.js"></script>
+    <script src="lib/MenuEvent.js"></script>
+
+    <script src="external/jquery/jquery-1.10.2.js"></script>
+    <script src="external/jquery/jquery-ui-1.10.4.custom.min.js"></script>
+    <script src="external/cssmenu/cssmenu.js"></script>
+    <script src="external/common/spin.js"></script>
+
+    <script src="js/ui.js"></script>
+
+</head>
+<body>
+
+<div id='cssmenu'></div>
+<div id="container"></div>
+
+<script>
+
+    var msgMgr = new MsgManager();
+    
+    //0. Layout改动
+    $("#container").load("layout/main.html", function() {
+        // 先初始化主内容相关的UI
+        UIInit();
+
+        // 再加载菜单，菜单加载完成后调用init()
+        $("#cssmenu").load("layout/menu.html", function() {
+            init();
+            running();
+        });
+    });
+
+
+    //1. Init
+    function init(){
+
+        // Init Menu
+        $("#cssmenu").menumaker({
+            title: "MYDEMO",
+            format: "multitoggle"
+        });
+
+        // Init Other
+        msgMgr.init();
+
+        // UI
+        UIInit();
+    }
+
+    //2. Update
+    function running()
+    {
+        requestAnimationFrame( running );
+        msgMgr.run();
+    }
+
+</script>
+    
+</body>
+</html>

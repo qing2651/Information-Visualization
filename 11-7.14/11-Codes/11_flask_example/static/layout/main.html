@@ -1,0 +1,43 @@
+
+    <div id="bottom_content">
+        <div id="option_container" class="z-depth-1">
+            <!-- <div id="suboption_container"> -->
+            <div id="suboption_container">
+                <fieldset class="field_set">
+                    <legend class="legend_text">Parameters</legend>
+                    <select name="option_segnum" id="option_segnum">
+                        <option value=84>Num 1</option>
+                        <option value=16>16</option>
+                        <option value=32>32</option>
+                        <option value=64>64</option>
+                        <option value=84>84</option>
+                        <option value=96>96</option>
+                    </select>
+                    <select name="option_density" id="option_density">
+                        <option value=16>Num 2</option>
+                        <option value=16>16</option>
+                        <option value=32>32</option>
+                        <option value=64>64</option>
+                        <option value=256>256</option>
+                        <option value=512>512</option>
+                        <option value=2048>2048</option>
+                    </select>
+                    <select name="option_height" id="option_height">
+                        <option value=1>Height</option>
+                        <option value=1>1</option>
+                        <option value=2>2</option>
+                        <option value=4>4</option>
+                        <option value=8>8</option>
+                        <option value=16>16</option>
+                        <option value=32>32</option>
+                    </select>
+                    <button onclick="buttonEventLoad()" class="ui-button ui-widget ui-corner-all" style="width:120px;height:27.5px;  top:0px;">Test</button>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <div id="annotator-container"></div>
+    <div style="margin-top:10px;">
+        <strong>计算结果: </strong><span id="result">-</span>
+    </div>

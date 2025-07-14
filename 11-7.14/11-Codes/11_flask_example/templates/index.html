@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#" />
+    <link href={{ url_for('static', filename='main.css') }} rel="stylesheet" media="screen">
+    <link href={{ url_for('static', filename='extend/jquery/jquery-ui.css') }} rel="stylesheet" media="screen">
+    <link href={{ url_for('static', filename='extend/jquery/jquery-style.css') }} rel="stylesheet" media="screen">
+
+    <link href={{ url_for('static', filename='extend/cssmenu/cssmenu.css') }} rel="stylesheet" media="screen">
+
+  </head>
+  <body>
+    <div id='cssmenu'></div>
+    <div class="container" id="mycontainer"></div>
+    <script src={{ url_for('static', filename='./extend/common/spin.js') }}></script>
+
+    <script src={{ url_for('static', filename='./extend/jquery/jquery-1.12.1.js') }}></script>
+    <script src={{ url_for('static', filename='./extend/jquery/jquery-ui.js') }}></script>
+
+    <script src={{ url_for('static', filename='./extend/cssmenu/cssmenu.js') }}></script>
+
+    <script src={{ url_for('static', filename='./lib/MsgManager.js') }}></script>
+    <script src={{ url_for('static', filename='./lib/MenuUIFunc.js') }}></script>
+    <script src={{ url_for('static', filename='./lib/MainUIFunc.js') }}></script>
+
+    <script src={{ url_for('static', filename='./main.js') }}></script>
+  </body>
+</html>

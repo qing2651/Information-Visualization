@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Button - Default functionality</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+  <script>
+  $( function() {
+    $( ".widget input[type=submit], .widget a, .widget button" ).button();
+    $( "button, input, a" ).on( "click", function( event ) {
+      event.preventDefault();
+    } );
+
+    //初始化对话框
+    $("#my-dialog").dialog({
+      autoOpen: false,
+      modal: true,
+      title: "对话框标题",
+      buttons: {
+        "关闭": function () {
+          $(this).dialog("close");
+        }
+      }
+    });
+
+    //按钮点击事件：打开对话框
+    $("#open-dialog-btn").on("click", function () {
+      $("#my-dialog").dialog("open");
+});
+
+  } );
+  </script>
+</head>
+<body>
+<div class="widget">
+  <h1>Widget Buttons</h1>
+  <button>A button element</button>
+
+  <input type="submit" value="A submit button">
+
+  <a href="#">An anchor</a>
+</div>
+<h1>CSS Buttons</h1>
+<button class="ui-button ui-widget ui-corner-all">A button element</button>
+
+<input class="ui-button ui-widget ui-corner-all" type="submit" value="A submit button">
+
+<a class="ui-button ui-widget ui-corner-all" href="#">An anchor</a>
+
+<!-- 显示对话框的按钮 -->
+<div style="margin-top: 30px;">
+  <button id="open-dialog-btn">点击显示对话框</button>
+</div>
+
+<div id="my-dialog" style="display:none;">
+  <p>你好，这是一个 jQuery UI 对话框示例！</p>
+</div>
+
+</body></html>

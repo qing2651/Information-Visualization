@@ -1,0 +1,335 @@
+/* custom css */
+
+body {
+    margin:0;
+    padding:0;
+    font-family:  'Montserrat';
+    line-height: 1.5em;
+    font-size: 12px;
+}
+
+/* Frame */
+.z-depth-1 {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19); }
+
+.z-depth-2 {
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); }
+
+.z-depth-3 {
+    box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19); }
+
+.z-depth-4, .modal {
+    box-shadow: 0 16px 28px 0 rgba(0, 0, 0, 0.22), 0 25px 55px 0 rgba(0, 0, 0, 0.21); }
+
+.z-depth-5 {
+    box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22); }
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.node rect {
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+  stroke-width: 0;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: 0.2;
+}
+
+.curveline:hover {
+  stroke-opacity: 1.0;
+}
+
+.staticlink:hover {
+  stroke-opacity: 1.0;
+}
+
+
+.field_set{
+  border-color: #dedede;
+  border-style: solid;
+}
+
+.legend_text{
+  font: 12px Helvetica;
+  color: #555555;
+}
+
+/* Container */
+#container{
+    margin-top:0px;
+    margin:0 auto;
+    background:#fff;
+}
+
+#top_content{
+    margin:0px auto;
+    width:1550px;
+    height:640px;
+}
+
+.clear{
+    clear:both;
+}
+
+#img_container{
+    margin:0px auto;
+    width:960px;
+    height:640px;
+    margin-top:20px;
+    margin-left:20px;
+    float:left;
+    border-radius:4px;
+}
+
+#bar_container{
+    margin:0px auto;
+    width:480px;
+    height:640px;
+    margin-top:20px;
+    margin-left:10px;
+    float:left;
+    border-radius:4px;
+}
+
+#tabs_group_sankey{
+    margin:0px auto;
+    width:444px;
+    height:576px;
+    margin-top:2px;
+    margin-left:-20px;
+    float:left;
+    border-radius:1px;
+}
+
+#tabs_group_bundling{
+    margin:0px auto;
+    width:444px;
+    height:576px;
+    margin-top:2px;
+    margin-left:-20px;
+    float:left;
+    border-radius:1px;
+}
+
+#tabs_feature{
+    margin:0px auto;
+    width:444px;
+    height:576px;
+    margin-top:2px;
+    margin-left:-2px;
+    float:left;
+    border-radius:1px;
+}
+
+#bottom_content{
+    margin:0px auto;
+    width:1500px;
+    height:64px;
+}
+
+#query_container{
+    margin:0px auto;
+    width:960px;
+    height:204px;
+    margin-top:10px;
+    margin-left:-4px;
+    float:left;
+    border-radius:4px;
+}
+
+#option_container{
+    margin:0px auto;
+    width:480px;
+    height:204px;
+    margin-top:10px;
+    margin-left:10px;
+    float:left;
+    border-radius:4px;
+}
+
+#suboption_container{
+    margin:0px auto;
+    width:470px;
+    height:204px;
+    margin-top:5px;
+    margin-left:5px;
+    float:left;
+    border-radius:0px;
+}
+
+#subquery_container_1{
+    margin:0px auto;
+    width:480px;
+    height:204px;
+    margin-top:0px;
+    margin-left:0px;
+    float:left;
+    border-radius:1px;
+}
+
+#subquery_container_2a{
+    margin:0px auto;
+    width:240px;
+    height:204px;
+    margin-top:0px;
+    float:left;
+    border-radius:1px;
+}
+
+#subquery_container_2b{
+    margin:0px auto;
+    width:240px;
+    height:204px;
+    margin-top:0px;
+    float:left;
+    border-radius:1px;
+}
+
+/* Test button */
+.mybutton1 {
+    right: 24px;
+    bottom: 16px;
+    top: 16px;
+    position: absolute;
+    padding: 2px;
+}
+
+.mybutton2 {
+    right: 6px;
+    bottom: 16px;
+    top: 16px;
+    position: absolute;
+    padding: 2px;
+}
+
+/* Query Chart */
+
+.chart {
+
+}
+
+.main text {
+    fill: grey;
+    font: 10px sans-serif;  
+}
+
+.axis line, .axis path {
+    shape-rendering: crispEdges;
+    stroke: grey;
+    fill: none;
+}
+
+/* For query panel 1 */
+circle.hidden {
+  fill: #ccc !important;
+}
+
+.extent {
+  fill: #000;
+  fill-opacity: .125;
+  stroke: #fff;
+}
+
+.lasso path {
+  stroke: rgb(80,80,80);
+  stroke-width:2px;
+}
+
+.lasso .drawn {
+  fill-opacity:.05 ;
+}
+
+.lasso .loop_close {
+  fill:none;
+  stroke-dasharray: 4,4;
+}
+
+.lasso .origin {
+  fill:#3399FF;
+  fill-opacity:.5;
+}
+
+.not_possible {
+  fill:rgb(200,200,200);
+}
+
+.possible {
+  fill:#EC888C;
+}
+
+/* For query panel 2*/
+.arc text {
+  font: 6px sans-serif;
+  text-anchor: middle;
+  fill: white;
+}
+
+.arc path {
+  stroke: #fff;
+}
+
+.hexagon {
+  fill: none;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+.rightTag text {
+  /*font: 14px Helvetica;*/
+  pointer-events: none;
+}
+
+.centerTag text {
+  font: 14px Helvetica;
+  pointer-events: none;
+}
+
+/* Query view */
+.queryview_second{
+    margin:0px auto;
+    margin-top:0px;
+    margin-left:16px;
+}
+
+/* For group view */
+.groupchart_first{
+    margin:0px auto;
+    margin-top:12px;
+    margin-left:48px;
+}
+
+/* Feature View */
+.map.mode-create {
+    cursor: crosshair;
+}
+
+.leaflet-edge {
+  background-color: #95bc59;
+  box-shadow: 0 0 0 2px white, 0 0 10px rgba(0, 0, 0, .35);
+  border-radius: 50%;
+  cursor: move;
+  outline: none;
+  transition: background-color .25s;
+}
+
+.leaflet-polygon {
+  fill: #b4cd8a;
+  stroke: #50622b;
+  stroke-width: 2;
+  fill-opacity: .75;
+}
+
+/* Feature View Drawing */
+svg.tracer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

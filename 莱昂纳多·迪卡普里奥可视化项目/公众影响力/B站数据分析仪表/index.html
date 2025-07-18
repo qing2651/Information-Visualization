@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>莱昂纳多 B站数据分析仪表盘</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", "微软雅黑", Arial, sans-serif;
+      background: #f0f2f5;
+    }
+    header {
+      background: linear-gradient(90deg, #1565c0, #5e92f3);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 26px;
+      font-weight: bold;
+    }
+    main {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+    section {
+      background: white;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .chart {
+      width: 100%;
+      height: 450px;
+    }
+  </style>
+</head>
+<body>
+<header>莱昂纳多 · B站数据分析仪表盘</header>
+<main>
+  <section>
+    <div class="section-title">📈 月度播放趋势</div>
+    <div id="chart1" class="chart"></div>
+  </section>
+
+  <section>
+    <div class="section-title">🎥 UP主累计播放量</div>
+    <div id="chart2" class="chart"></div>
+  </section>
+
+  <section>
+    <div class="section-title">🔥 月度互动率（点赞+收藏+弹幕÷播放量）</div>
+    <div id="chart3" class="chart"></div>
+  </section>
+
+  <section>
+    <div class="section-title">❤️ 点赞 vs 收藏 vs 弹幕</div>
+    <div id="chart4" class="chart"></div>
+  </section>
+
+  <section>
+    <div class="section-title">🏆 播放量 TOP10 视频</div>
+    <div id="chart5" class="chart"></div>
+  </section>
+</main>
+
+<script>
+fetch("bilibili_莱昂纳多_videos.json")
+  .then(res => res.json())
+  .then(data => {
+    const monthMap = {}, upMap = {};
+    const videoStats = [];
+
+    data.forEach(v => {
+      const pub = new Date(v["发布时间"]);
+      const month = `${pub.getFullYear()}-${String(pub.getMonth()+1).padStart(2,'0')}`;
+      const play=+v["播放量"], like=+v["点赞数"], fav=+v["收藏数"], danmaku=+v["弹幕数"];
+      const up=v["UP主"];
+      monthMap[month] = monthMap[month]||{play:0, like:0, fav:0, danmaku:0, count:0};
+      Object.assign(monthMap[month], {
+        play:monthMap[month].play+play,
+        like:monthMap[month].like+like,
+        fav:monthMap[month].fav+fav,
+        danmaku:monthMap[month].danmaku+danmaku,
+        count:monthMap[month].count+1
+      });
+      upMap[up] = (upMap[up]||0)+play;
+      videoStats.push({title:v["标题"],play,like,fav,danmaku});
+    });
+
+    const months=Object.keys(monthMap).sort();
+    const plays=months.map(m=>monthMap[m].play);
+    const interactRate=months.map(m=> {
+      const o=monthMap[m];
+      return +((o.like+o.fav+o.danmaku)/o.play).toFixed(4);
+    });
+
+    echarts.init(document.getElementById("chart1")).setOption({
+      title:{left:'center'},
+      tooltip:{trigger:'axis'},
+      xAxis:{type:'category',data:months},
+      yAxis:{type:'value',name:'播放量'},
+      series:[{type:'line',data:plays,smooth:true,areaStyle:{opacity:0.2}}],
+      toolbox:{feature:{saveAsImage:{}}}
+    });
+
+    const upArr=Object.entries(upMap).sort((a,b)=>b[1]-a[1]);
+    const upNames=upArr.map(x=>x[0]);
+    const upPlays=upArr.map(x=>x[1]);
+    echarts.init(document.getElementById("chart2")).setOption({
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+      xAxis:{type:'category',data:upNames,axisLabel:{rotate:30}},
+      yAxis:{type:'value',name:'播放量'},
+      series:[{type:'bar',data:upPlays, itemStyle:{color:'#5e92f3'}}],
+      toolbox:{feature:{saveAsImage:{}}}
+    });
+
+    echarts.init(document.getElementById("chart3")).setOption({
+      tooltip:{trigger:'axis'},
+      xAxis:{type:'category',data:months},
+      yAxis:{type:'value',name:'互动率'},
+      series:[{type:'line',data:interactRate,smooth:true,areaStyle:{opacity:0.2}}],
+      toolbox:{feature:{saveAsImage:{}}}
+    });
+
+    echarts.init(document.getElementById("chart4")).setOption({
+      tooltip:{trigger:'item',formatter:p=>`${videoStats[p.dataIndex].title}<br>收藏:${p.value[0]} 点赞:${p.value[1]} 弹幕:${p.value[2]}`},
+      xAxis:{name:'收藏数',type:'value'},
+      yAxis:{name:'点赞数',type:'value'},
+      series:[{
+        symbolSize: function(p){ return Math.sqrt(p[2])*2; },
+        data: videoStats.map(v=>[v.fav,v.like,v.danmaku]),
+        type:'scatter'
+      }],
+      toolbox:{feature:{saveAsImage:{}}}
+    });
+
+    const top10= videoStats.sort((a,b)=>b.play-a.play).slice(0,10).reverse();
+    echarts.init(document.getElementById("chart5")).setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          return `<b>标题：</b>${params.name}<br/><b>播放量：</b>${params.value}`;
+        }
+      },
+      grid: {
+        left:250,
+        right: 30,
+        top: 20,
+        bottom: 40
+      },
+      xAxis: {
+        type: 'value'
+      },
+      yAxis: {
+        type: 'category',
+        data: top10.map(v => v.title.length > 40 ? v.title.slice(0, 40) + '...' : v.title),
+        axisLabel: {
+          interval: 0,
+          fontSize:10,
+          lineHeight: 14,
+          formatter: function(value) {
+            const maxLineLen = 15;
+            let ret = '';
+            for (let i = 0; i < value.length; i += maxLineLen) {
+              ret += value.substring(i, i + maxLineLen) + '\n';
+            }
+            return ret;
+          }
+        }
+      },
+      series: [{
+        type: 'bar',
+        data: top10.map(v => v.play),
+        label: { show: true, position: 'right' },
+        itemStyle: { color: '#5e92f3' }
+      }],
+      toolbox: { feature: { saveAsImage: {} } }
+    });
+
+  })
+  .catch(e=>{
+    document.body.innerHTML="<h2 style='text-align:center;margin-top:50px;'>❌ 加载失败，请确认 JSON 文件在同一目录。</h2>";
+    console.error(e);
+  });
+</script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>导演合作热力图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #controls { margin-bottom: 10px; }
+    label { margin-right: 10px; }
+    #heatmap { width: 100%; height: 600px; }
+  </style>
+</head>
+<body>
+
+  <h2>导演年份合作热力图</h2>
+
+  <div id="controls">
+    <label>
+      选择年份:
+      <select id="yearSelect">
+        <option value="all">全部</option>
+      </select>
+    </label>
+
+    <label>
+      搜索人物:
+      <input type="text" id="personSearch" placeholder="输入人物姓名"/>
+    </label>
+  </div>
+
+  <div id="heatmap"></div>
+
+  <script>
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = line.split(',');
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h.trim()] = values[i] ? values[i].trim() : '';
+        });
+        return obj;
+      });
+    }
+
+    //预处理数据，生成热力图用的结构
+    function preprocess(data) {
+      const yearSet = new Set();
+      const personSet = new Set();
+
+      data.forEach(d => {
+        //提取 release_date 的年份，只保留4位数字开头的
+        let year = '';
+        const match = d.release_date && d.release_date.match(/^\d{4}/);
+        if (match) {
+          year = match[0];
+        } else {
+          year = '未知'; //fallback
+        }
+        d.year = year;
+        yearSet.add(year);
+        personSet.add(d.collaborator_name);
+      });
+
+      //年份排序（把 '未知' 放最后）
+      const years = Array.from(yearSet).filter(y => y !== '未知').sort((a, b) => +a - +b);
+      if (yearSet.has('未知')) {
+        years.push('未知');
+      }
+
+      const persons = Array.from(personSet).sort();
+
+      const countMap = new Map();
+      data.forEach(d => {
+        const key = d.year + '_' + d.collaborator_name;
+        countMap.set(key, (countMap.get(key) || 0) + 1);
+      });
+
+      const yearIndexMap = new Map(years.map((y, i) => [y, i]));
+      const personIndexMap = new Map(persons.map((p, i) => [p, i]));
+
+      const heatmapData = [];
+      countMap.forEach((count, key) => {
+        const [year, person] = key.split('_');
+        const x = yearIndexMap.get(year);
+        const y = personIndexMap.get(person);
+        if (x !== undefined && y !== undefined) {
+          heatmapData.push([x, y, count]);
+        }
+      });
+
+      return { years, persons, heatmapData };
+    }
+
+
+    //初始化年份下拉控件
+    function initYearSelect(years) {
+      const select = document.getElementById('yearSelect');
+      years.forEach(year => {
+        const opt = document.createElement('option');
+        opt.value = year;
+        opt.textContent = year;
+        select.appendChild(opt);
+      });
+    }
+
+    //渲染
+    function renderHeatmap(persons, years, data, highlightPerson = '') {
+      const chartDom = document.getElementById('heatmap');
+      const chart = echarts.init(chartDom);
+
+      const maxVal = data.length ? Math.max(...data.map(d => d[2])) : 1;
+
+      const option = {
+        tooltip: {
+          position: 'top',
+          formatter: params => {
+            const year = years[params.data[0]];
+            const person = persons[params.data[1]];
+            const count = params.data[2];
+            return `${person}<br>年份: ${year}<br>合作次数: ${count}`;
+          }
+        },
+        grid: {
+          height: '70%',
+          top: '10%',
+          left: '15%',
+          right: '5%'
+        },
+        xAxis: {
+          type: 'category',
+          data: years,
+          splitArea: { show: true },
+          axisLabel: { rotate: 45 }
+        },
+        yAxis: {
+          type: 'category',
+          data: persons,
+          splitArea: { show: true },
+          inverse: true
+        },
+        visualMap: {
+          min: 0,
+          max: maxVal,
+          calculable: true,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: '5%',
+          inRange: {
+            color: ['#ffffb2', '#fecc5c', '#fd8d3c', '#f03b20', '#bd0026']
+          }
+        },
+        series: [{
+          name: '合作热度',
+          type: 'heatmap',
+          data: data,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0,0,0,0.5)'
+            }
+          },
+          progressive: 1000
+        }]
+      };
+
+      chart.setOption(option);
+
+      // 高亮人物所有年份
+      if(highlightPerson) {
+        const idx = persons.indexOf(highlightPerson);
+        if(idx >= 0) {
+          data.forEach((d,i) => {
+            if(d[1] === idx) {
+              chart.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: i });
+            }
+          });
+        }
+      }
+
+      return chart;
+    }
+
+    //筛选条件过滤数据
+    function filterData(preData, filterYear, searchPerson) {
+      let filtered = preData.heatmapData;
+
+      if(filterYear && filterYear !== 'all') {
+        const yIdx = preData.years.indexOf(filterYear);
+        filtered = filtered.filter(d => d[0] === yIdx);
+      }
+
+      if(searchPerson) {
+        const searchLower = searchPerson.toLowerCase();
+        filtered = filtered.filter(d => {
+          const personName = preData.persons[d[1]].toLowerCase();
+          return personName.includes(searchLower);
+        });
+      }
+
+      return filtered;
+    }
+
+    async function main() {
+      try {
+        const resp = await fetch('collaborations.csv');
+        const csvText = await resp.text();
+        const rawData = parseCSV(csvText);
+
+        const preData = preprocess(rawData);
+        initYearSelect(preData.years);
+
+        let currentYear = 'all';
+        let currentSearch = '';
+
+        let chart = renderHeatmap(preData.persons, preData.years, preData.heatmapData);
+
+        document.getElementById('yearSelect').addEventListener('change', e => {
+          currentYear = e.target.value;
+          const filtered = filterData(preData, currentYear, currentSearch);
+          chart.dispose();
+          chart = renderHeatmap(preData.persons, preData.years, filtered, currentSearch);
+        });
+
+        document.getElementById('personSearch').addEventListener('input', e => {
+          currentSearch = e.target.value.trim();
+          const filtered = filterData(preData, currentYear, currentSearch);
+          chart.dispose();
+          chart = renderHeatmap(preData.persons, preData.years, filtered, currentSearch);
+        });
+
+      } catch(e) {
+        alert('读取数据失败，请确认已启动本地服务器并且 collaborations.csv 文件与页面同目录');
+        console.error(e);
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

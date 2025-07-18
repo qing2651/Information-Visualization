@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello React!</title>
+  <script src="js/react.js"></script>
+  <script src="js/react-dom.js"></script>
+  <script src="js/material-ui.js"></script>
+  <script src="js/babel.js"></script>
+  <script src="js/echarts.js"></script>
+
+  <script src="components/ReactEcharts.js" type="text/babel"></script>
+  <script src="components/LineChart.js" type="text/babel"></script>
+  <script src="components/BarChart.js" type="text/babel"></script>
+  <script src="components/ScatterChart.js" type="text/babel"></script>
+
+  <style>
+    body {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { Stack, Card, Button, Slider, Box, Typography } = MaterialUI;  // 导入 MaterialUI 组件
+
+    const DashBoard = () => {
+      const [seriesData, setSeriesData] = React.useState([150, 230, 224, 218, 135, 147, 260]);
+      const [maxChartValue, setMaxChartValue] = React.useState(300);
+
+      const xAxisOption = {
+        type: 'category',
+        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      };
+
+      const yAxisOption = {
+        type: 'value'
+      };
+
+      const lineChartOption = {
+        xAxis: xAxisOption,
+        yAxis: yAxisOption,
+        series: [
+          {
+            data: seriesData,
+            type: 'line',
+            itemStyle: {
+              color: '#fc7ea0'
+            }
+          }
+        ]
+      };
+
+      const barChartOption = {
+        xAxis: xAxisOption,
+        yAxis: yAxisOption,
+        series: [
+          {
+            data: seriesData.map(item => item * 2),
+            type: 'bar',
+            itemStyle: {
+              color: '#4edfc3'
+            }
+          }
+        ]
+      };
+
+
+      const scatterChartOption = {
+        xAxis: {},
+        yAxis: {},
+        series: [{
+          symbolSize: 20,
+          data: seriesData.map((item, index) => [index, item * 3]),
+          type: 'scatter',
+          itemStyle: {
+            color: '#9b68f0'
+          }
+        }]
+      };
+
+      const handleReset = () => {
+        const newData = seriesData.map(() => {
+          return Math.floor(Math.random() * maxChartValue);
+        });
+        setSeriesData(newData);
+      };
+
+      return (
+        <Stack>
+          <Stack direction={'row'} alignItems={'flex-end'} mx={5} my={2} spacing={2}>
+            <Button sx={{width: 100}} variant={'contained'} onClick={handleReset}>
+              Reset
+            </Button>
+            <Stack direction={'row'} width={400} spacing={1}>
+              <Typography width={150}>
+                Max Value
+              </Typography>
+              <Slider
+                defaultValue={300}
+                max={1000}
+                min={50}
+                value={maxChartValue}
+                onChange={(event, value) => setMaxChartValue(value)}
+              />
+              <Typography width={150}>
+                {maxChartValue}
+              </Typography>
+            </Stack>
+          </Stack>
+          <Stack direction={'row'} justifyContent={'space-between'} m={5}>
+            <Card>
+              <LineChart option={lineChartOption} />
+            </Card>
+            <Card>
+              <BarChart option={barChartOption} />
+            </Card>
+          </Stack>
+          <Box m={5}>
+            <Card>
+              <ScatterChart option={scatterChartOption} />
+            </Card>
+          </Box>
+        </Stack>
+      );
+    }
+
+    ReactDOM.render(
+      <DashBoard />,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+</html>

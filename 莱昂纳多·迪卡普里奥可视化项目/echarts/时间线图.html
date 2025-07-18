@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>莱昂纳多电影分析</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; color: #333; }
+    #chart { width: 100%; height: 600px; }
+  </style>
+</head>
+<body>
+  <h1>莱昂纳多电影生涯分析 (1990-2025)</h1>
+  <div id="chart"></div>
+
+  <script>
+    const customColors = [
+      '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+      '#aec7e8', '#ff9896'
+    ];
+
+    fetch('leonardo_data.json')
+      .then(response => response.json())
+      .then(data => {
+        const movies = data.movies.map(movie => {
+          const year = movie.release_date ? parseInt(movie.release_date.substring(0, 4)) : null;
+          const director = movie.directors && movie.directors.length > 0 ? movie.directors[0].name : '未知';
+          const collaborators = movie.cast ? movie.cast.slice(0, 3).map(actor => actor.name).join(', ') : '未知';
+          const revenue = movie.revenue || 0;
+          const rating = movie.vote_average || 0;
+          const importance = (revenue / 1000000 * 0.5) + (rating * 1000 * 0.5);
+          const genre = movie.genres && movie.genres.length > 0 ? movie.genres[0] : '未知';
+          
+          return {
+            title: movie.title,
+            year: year,
+            director: director,
+            genre: genre,
+            rating: rating,
+            revenue: revenue,
+            importance: importance,
+            collaborators: collaborators
+          };
+        });
+
+        const filteredMovies = movies
+          .filter(movie => movie.year >= 1990 && movie.year <= 2025)
+          .filter((movie, index, self) => 
+            index === self.findIndex(m => m.title === movie.title)
+          );
+
+        const uniqueGenres = [...new Set(filteredMovies.map(m => m.genre))];
+        const colorMap = {};
+        uniqueGenres.forEach((genre, i) => {
+          colorMap[genre] = customColors[i % customColors.length];
+        });
+
+        // 构建图表数据 - 确保每个节点独立
+        const chartData = filteredMovies.map(movie => {
+          const hoverText = `<b>${movie.title}</b><br>
+                             年份: ${movie.year}<br>
+                             类型: ${movie.genre}<br>
+                             重要性: ${movie.importance.toFixed(2)}<br>
+                             导演: ${movie.director}<br>
+                             评分: ${movie.rating.toFixed(1)}<br>
+                             票房: ${(movie.revenue / 1000000).toFixed(2)} M$<br>
+                             合作演员: ${movie.collaborators}`;
+          
+          const maxRevenue = Math.max(...filteredMovies.map(m => m.revenue));
+          const minRevenue = Math.min(...filteredMovies.map(m => m.revenue));
+          const size = 15 + ((movie.revenue - minRevenue) / (maxRevenue - minRevenue)) * 35;
+          
+          return {
+            x: [movie.year],
+            y: [movie.importance],
+            mode: 'markers',
+            marker: {
+              size: size,
+              color: colorMap[movie.genre],
+              opacity: 0.8,
+              line: { width: 1, color: 'DarkSlateGrey' }
+            },
+            name: movie.title,
+            text: hoverText,
+            hoverinfo: 'text',
+            type: 'scatter',
+            legendgroup: movie.genre,
+            showlegend: false
+          };
+        });
+
+        // 正确的图例 - 按电影类型
+        const legendItems = uniqueGenres.map(genre => ({
+          x: [null],
+          y: [null],
+          mode: 'markers',
+          marker: { size: 10, color: colorMap[genre] },
+          name: genre,
+          hoverinfo: 'none',
+          type: 'scatter',
+          legendgroup: genre,
+          showlegend: true
+        }));
+
+        const plotData = [...chartData, ...legendItems];
+
+        const layout = {
+          title: '莱昂纳多电影生涯分析 (1990-2025)',
+          xaxis: {
+            title: '上映年份',
+            range: [1989, 2026],
+            dtick: 2,
+            tickmode: 'linear',
+            showgrid: true
+          },
+          yaxis: {
+            title: '重要性评分 (票房+评分)',
+            showline: true,
+            showgrid: true,
+            zeroline: true
+          },
+          hoverlabel: {
+            bgcolor: 'white',
+            font: { size: 12 }
+          },
+          height: 600,
+          margin: { l: 80, r: 40, t: 80, b: 80 },
+          template: 'plotly_white',
+          hovermode: 'closest' // 关键修改：确保只显示最近的点
+        };
+
+        Plotly.newPlot('chart', plotData, layout);
+      })
+      .catch(error => console.error('加载数据失败:', error));
+  </script>
+</body>
+</html>

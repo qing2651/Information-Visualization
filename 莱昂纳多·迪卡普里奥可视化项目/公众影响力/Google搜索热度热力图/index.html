@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google点击量地图热力图</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f0f2f5;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    #controls {
+      margin: 20px;
+    }
+    select {
+      font-size: 16px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    #main {
+      width: 90%;
+      max-width: 1200px;
+      height: 700px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="controls">
+    <select id="mapSelector">
+      <option value="china">中国地图</option>
+      <option value="world">世界地图</option>
+    </select>
+  </div>
+
+  <div id="main"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <script>
+    const chart = echarts.init(document.getElementById('main'));
+
+    const mapConfigs = {
+      china: {
+        geoUrl: 'https://geo.datav.aliyun.com/areas/bound/100000_full.json',
+        jsonUrl: 'china.json',
+        mapName: 'china',
+        nameKey: 'region'
+      },
+      world: {
+        geoUrl: 'https://code.highcharts.com/mapdata/custom/world.geo.json',
+        jsonUrl: 'global.json',
+        mapName: 'world',
+        nameKey: 'country',
+        nameFormatter: name => {
+          const mappings = {
+            'United States': 'United States of America',
+            'South Korea': 'Korea',
+            'Russia': 'Russian Federation',
+            'Czech Republic': 'Czechia',
+            'Taiwan': 'Taiwan, China',
+            'Hong Kong': 'China',
+            'Macao': 'China'
+          };
+          return mappings[name] || name;
+        }
+      }
+    };
+
+    function loadMap(mapType) {
+      chart.showLoading();
+      const config = mapConfigs[mapType];
+
+      Promise.all([
+        fetch(config.geoUrl).then(res => res.json()),
+        fetch(config.jsonUrl).then(res => res.json())
+      ])
+        .then(([geoJson, dataJson]) => {
+          // 注册地图
+          echarts.registerMap(config.mapName, geoJson);
+
+          // 处理数据
+          const data = dataJson.data
+            .filter(item => item.value !== null)
+            .map(item => ({
+              name: config.nameFormatter 
+                ? config.nameFormatter(item[config.nameKey]) 
+                : item[config.nameKey],
+              value: item.value
+            }));
+
+          const maxVal = Math.max(100, ...data.map(item => item.value || 0));
+
+          const option = {
+            title: {
+              text: mapType === 'china' ? '中国地图热力图' : '世界地图热力图',
+              left: 'center',
+              top: 20,
+              textStyle: {
+                fontSize: 26,
+                fontWeight: 'bold',
+                color: '#333'
+              }
+            },
+            tooltip: {
+              trigger: 'item',
+              backgroundColor: '#ffffff',
+              borderColor: '#a6d8a8',
+              borderWidth: 1,
+              textStyle: {
+                color: '#2d9c2d',
+                fontSize: 14
+              },
+              padding: 10,
+              formatter: function(params) {
+                const value = params.value != null ? params.value : '无数据';
+                return `
+                  <div style="font-weight: bold; font-size: 15px;">${params.name}</div>
+                  <div style="margin-top: 5px;">热度值：<span style="color: #3cbc3c;">${value}</span></div>
+                `;
+              },
+              extraCssText: 'box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px;'
+            },
+            visualMap: {
+              min: 0,
+              max: maxVal,
+              left: 'left',
+              bottom: 40,
+              calculable: true,
+              itemHeight: 120,
+              itemWidth: 20,
+              text: ['高', '低'],
+              textStyle: {
+                fontSize: 14,
+                color: '#333'
+              },
+              inRange: {
+                color: ['#ffe5e5', '#ff9999', '#ff4d4d', '#e60000', '#990000']
+              }
+            },
+
+            series: [
+              {
+                name: '热度值',
+                type: 'map',
+                map: config.mapName,
+                roam: true,
+                label: {
+                  show: mapType === 'china',
+                  fontSize: 12,
+                  color: '#222'
+                },
+                emphasis: {
+                  label: {
+                    show: true,
+                    fontWeight: 'bold',
+                    color: '#000'
+                  },
+                  itemStyle: {
+                    shadowBlur: 15,
+                    shadowColor: 'rgba(0,0,0,0.3)',
+                    areaColor: '#ffd54f'
+                  }
+                },
+                data: data
+              }
+            ]
+          };
+
+          chart.setOption(option);
+          chart.hideLoading();
+        })
+        .catch(err => {
+          console.error(err);
+          chart.hideLoading();
+          alert('加载地图或数据失败，请检查路径和格式');
+        });
+    }
+
+    // 默认加载中国地图
+    loadMap('china');
+
+    // 切换地图事件
+    document.getElementById('mapSelector').addEventListener('change', (e) => {
+      loadMap(e.target.value);
+    });
+
+    window.addEventListener('resize', () => {
+      chart.resize();
+    });
+  </script>
+</body>
+</html>
+
+
+
+

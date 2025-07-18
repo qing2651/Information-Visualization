@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>迪卡普里奥奖项可视化</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; padding: 20px; background: #fafafa; }
+  h1 { text-align: center; margin-bottom: 40px; }
+  #barChart, #timelineChart, #wordCloud {
+    width: 100%;
+
+    height: 400px;
+    margin: 0 auto 50px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<h1>莱昂纳多·迪卡普里奥 个人荣誉奖项可视化</h1>
+
+<div id="barChart"></div>
+<div id="timelineChart"></div>
+<div id="wordCloud"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
+
+<script>
+async function loadAwardsData() {
+  try {
+    const response = await fetch('awards.json');
+    if (!response.ok) throw new Error("加载JSON文件失败");
+    const data = await response.json();
+    return data;
+  } catch(e) {
+    alert("加载数据出错: " + e.message);
+    return null;
+  }
+}
+
+function processData(data) {
+  const awardTypes = [...new Set(data.map(item => item.奖项))];
+  const statusTypes = ['提名', '获奖'];
+
+  const seriesData = statusTypes.map(status => ({
+    name: status,
+    type: 'bar',
+    stack: '总量',
+    emphasis: {focus: 'series'},
+    data: awardTypes.map(award =>
+      data.filter(item => item.奖项 === award && item.结果 === status).length
+    )
+  }));
+
+  const years = [...new Set(data.map(item => item.年份))].sort((a,b) => a-b);
+  const timelineSeries = statusTypes.map(status => ({
+    name: status,
+    type: 'line',
+    data: years.map(year =>
+      data.filter(item => item.年份 === year && item.结果 === status).length
+    )
+  }));
+
+  const keywords = {};
+  data.forEach(item => {
+    if (item.电影) keywords[item.电影] = (keywords[item.电影] || 0) + 2;
+    if (item.奖项) keywords[item.奖项] = (keywords[item.奖项] || 0) + 1;
+    if (item.结果) keywords[item.结果] = (keywords[item.结果] || 0) + 0.5;
+  });
+  const wordCloudData = Object.entries(keywords).map(([name, value]) => ({ name, value }));
+
+  return { awardTypes, statusTypes, seriesData, years, timelineSeries, wordCloudData };
+}
+
+function renderCharts(processed) {
+  echarts.init(document.getElementById('barChart')).setOption({
+    title: { text: '各奖项提名/获奖情况' },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: processed.statusTypes },
+    xAxis: { type: 'category', data: processed.awardTypes },
+    yAxis: { type: 'value' },
+    series: processed.seriesData
+  });
+
+  echarts.init(document.getElementById('timelineChart')).setOption({
+    title: { text: '提名/获奖年份分布趋势' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: processed.statusTypes },
+    xAxis: { type: 'category', data: processed.years },
+    yAxis: { type: 'value' },
+    series: processed.timelineSeries
+  });
+
+  echarts.init(document.getElementById('wordCloud')).setOption({
+    title: { text: '获奖与作品关键词词云' },
+    tooltip: {},
+    series: [{
+      type: 'wordCloud',
+      shape: 'circle',
+      gridSize: 8,
+      sizeRange: [14, 50],
+      rotationRange: [-45, 90],
+      textStyle: {
+        fontFamily: 'Microsoft YaHei',
+        fontWeight: 'bold',
+        color: () =>
+          'rgb(' +
+          [Math.round(Math.random() * 160), Math.round(Math.random() * 160), Math.round(Math.random() * 160)].join(',') +
+          ')'
+      },
+      data: processed.wordCloudData
+    }]
+  });
+}
+
+
+(async () => {
+  const data = await loadAwardsData();
+  if (!data) return;
+  const processed = processData(data);
+  renderCharts(processed);
+})();
+</script>
+
+</body>
+</html>
+

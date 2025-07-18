@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>莱昂纳多·迪卡普里奥可视化总览</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <style>
+    /* 背景图设置 */
+    .hero-section {
+      position: relative;
+      height: 600px;
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: 20% center;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+    
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.5), rgba(0,0,0,0));
+      display: flex;
+      align-items: flex-end;
+      padding: 60px 35px;
+    }
+    
+    .hero-title-container {
+      max-width: 800px;
+    }
+    
+    .hero-title {
+      color: #fff;
+      font-size: 4.5rem;
+      font-weight: 800;
+      margin: 0 0 15px 0;
+      letter-spacing: -1px;
+      text-transform: uppercase;
+      text-shadow: 3px 3px 0 #8B0000,
+                   5px 5px 10px rgba(0,0,0,0.6);
+      transform: skew(-5deg);
+      line-height: 1.1;
+    }
+
+    /* 导航栏样式 */
+    .custom-navbar {
+      border: 3px solid #8B0000;
+      background-color: #000;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+      margin-bottom: 3rem;
+    }
+    
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      border-right: 1px solid rgba(139,0,0,0.3);
+    }
+    
+    .nav-item:last-child {
+      border-right: none;
+    }
+    
+    .custom-navbar .nav-link {
+      color: #fff;
+      font-size: 1.2rem;
+      padding: 1rem 0;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .custom-navbar .nav-link:hover {
+      background-color: #8B0000;
+      color: #fff;
+    }
+    
+    .custom-navbar .dropdown-menu {
+      background-color: #000;
+      border: 2px solid #8B0000;
+      border-radius: 0 0 10px 10px;
+      transform-origin: top;
+      opacity: 0;
+      display: block;
+      visibility: hidden;
+      transform: scaleY(0);
+      transition: all 0.3s ease;
+      margin-top: -1px;
+      width: 100%;
+    }
+    
+    .custom-navbar .dropdown-item {
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+      text-align: center;
+    }
+    
+    .custom-navbar .dropdown-item:hover {
+      background-color: #8B0000;
+    }
+    
+    .custom-navbar .dropdown:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: scaleY(1);
+    }
+
+    /* 人物介绍区域样式 */
+    .bio-section {
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 3rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-top: 5px solid #8B0000;
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    /* 大头贴样式（优化名字标签位置） */
+    .bio-pic-container {
+      flex: 0 0 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bio-pic {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      border: 5px solid #000;
+      transition: transform 0.3s ease;
+    }
+
+    .bio-pic:not([src]) {
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 1rem;
+    }
+
+    .bio-pic:hover {
+      transform: scale(1.03);
+    }
+
+    /* 优化后的名字标签 */
+    .pic-caption {
+      margin-top: 15px; /* 与图片保持距离 */
+      background-color: #8B0000;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 100%; /* 与图片宽度一致 */
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* 文字内容样式 */
+    .bio-content-container {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .bio-title {
+      color: #000;
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid #8B0000;
+      font-weight: 700;
+    }
+
+    .bio-content p {
+      color: #333;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+      text-align: justify;
+    }
+
+    .bio-content .quote {
+      font-style: italic;
+      color: #8B0000;
+      font-size: 1.2rem;
+      padding: 1rem;
+      border-left: 4px solid #8B0000;
+      margin: 1.5rem 0;
+      background-color: #f8f8f8;
+    }
+
+    .bio-content .highlight {
+      color: #8B0000;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 992px) {
+      .hero-title {
+        font-size: 3.5rem;
+      }
+      .hero-overlay {
+        padding: 40px 60px;
+      }
+      .bio-section {
+        padding: 2rem;
+      }
+      .bio-pic-container {
+        margin: 0 auto;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      .hero-overlay {
+        padding: 30px 40px;
+      }
+      .bio-title {
+        font-size: 1.8rem;
+      }
+      .bio-content p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- 背景图区域 -->
+  <div class="hero-section">
+    <div class="hero-overlay">
+      <div class="hero-title-container">
+        <h2 class="hero-title">莱昂纳多·迪卡普里奥</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <!-- 导航栏区域 -->
+    <nav class="navbar custom-navbar navbar-expand-lg">
+      <div class="container-fluid px-0">
+        <button class="navbar-toggler bg-danger mx-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav w-100">
+            <!-- 电影作品菜单 -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarMovieDropdown" role="button" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="fa fa-film d-block mb-1"></i> 
+                <span>电影作品</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarMovieDropdown">
+                <li><a class="dropdown-item" href="echarts/时间线图.html" target="_blank">
+                  <i class="fa fa-clock-o me-2"></i>影片时间轴
+                </a></li>
+                <li><a class="dropdown-item" href="时间轴热力图/index.html" target="_blank">
+                  <i class="fa fa-fire me-2"></i>导演合作热力图
+                </a></li>
+                <li><a class="dropdown-item" href="echarts/电影类型饼状图.html" target="_blank">
+                  <i class="fa fa-pie-chart me-2"></i>电影类型饼状图
+                </a></li>
+              </ul>
+            </li>
+            
+            <!-- 合作关系菜单 -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarCollaborationDropdown" role="button" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="fa fa-users d-block mb-1"></i> 
+                <span>合作关系</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarCollaborationDropdown">
+                <li><a class="dropdown-item" href="合作关系力导向图/index.html" target="_blank">
+                  <i class="fa fa-link me-2"></i>合作关系力导向图
+                </a></li>
+                <li><a class="dropdown-item" href="echarts/导演关系图.html" target="_blank">
+                  <i class="fa fa-film me-2"></i>导演关系图
+                </a></li>
+                <li><a class="dropdown-item" href="echarts/演员关系图.html" target="_blank">
+                  <i class="fa fa-user me-2"></i>演员关系图
+                </a></li>
+              </ul>
+            </li>
+            
+            <!-- 公众影响力菜单 -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarInfluenceDropdown" role="button" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="fa fa-globe d-block mb-1"></i> 
+                <span>公众影响力</span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarInfluenceDropdown">
+                <li><a class="dropdown-item" href="公众影响力/B站数据分析仪表/index.html" target="_blank">
+                  <i class="fa fa-bar-chart me-2"></i>B站数据分析仪表盘
+                </a></li>
+                <li><a class="dropdown-item" href="公众影响力/Google搜索热度热力图/index.html" target="_blank">
+                  <i class="fa fa-search me-2"></i>Google搜索热度
+                </a></li>
+                <li><a class="dropdown-item" href="公众影响力/个人荣誉奖项/index.html" target="_blank">
+                  <i class="fa fa-trophy me-2"></i>个人荣誉奖项
+                </a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- 人物介绍区域 -->
+    <div class="bio-section">
+      <!-- 大头贴部分 -->
+      <div class="bio-pic-container">
+        <img src="1.jpg" 
+             alt="莱昂纳多·迪卡普里奥" 
+             class="bio-pic">
+        <div class="pic-caption">Leonardo DiCaprio (1974- )</div>
+      </div>
+      
+      <!-- 文字内容部分 -->
+      <div class="bio-content-container">
+        <h2 class="bio-title">莱昂纳多·迪卡普里奥：演员、环保主义者</h2>
+        <div class="bio-content">
+          <p>莱昂纳多·迪卡普里奥（Leonardo DiCaprio）是一位美国演员、电影制片人和环保活动家。他的演艺生涯始于1990年代，凭借其出色的演技和对多样化角色的演绎而广受赞誉。</p>
+          
+          <p class="quote">"我做的每个选择都基于我对角色的热爱，以及我认为它是否能够触动观众。"</p>
+          
+          <p>他的代表作包括<span class="highlight">《泰坦尼克号》（1997）</span>、《盗梦空间》（2010）、<span class="highlight">《荒野猎人》（2015）</span>等。其中，《泰坦尼克号》成为电影史上最成功的电影之一，而他凭借《荒野猎人》中的表演获得了奥斯卡最佳男主角奖。</p>
+          
+          <p>除了演艺事业，迪卡普里奥还是一位积极的环保主义者。他通过自己的基金会支持多项环保项目，并致力于提高公众对气候变化的认识。2016年，他被联合国任命为"和平使者"，专注于气候变化问题。</p>
+          
+          <p>在超过30年的职业生涯中，迪卡普里奥已经从一个青少年偶像成长为好莱坞最受尊敬的实力派演员之一，他的作品多次获得奥斯卡、金球奖等顶级奖项的认可。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 为下拉菜单添加动画效果
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdowns = document.querySelectorAll('.dropdown');
+      
+      dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('mouseenter', function() {
+          const menu = this.querySelector('.dropdown-menu');
+          menu.style.display = 'block';
+          setTimeout(() => {
+            menu.classList.add('show');
+          }, 10);
+        });
+        
+        dropdown.addEventListener('mouseleave', function() {
+          const menu = this.querySelector('.dropdown-menu');
+          menu.classList.remove('show');
+          setTimeout(() => {
+            menu.style.display = 'none';
+          }, 300);
+        });
+      });
+    });
+
+    // 图片加载失败时显示提示
+    document.querySelectorAll('.bio-pic').forEach(img => {
+      img.addEventListener('error', function() {
+        this.src = '1.jpg';
+        this.alt = '莱昂纳多·迪卡普里奥（图片加载失败）';
+      });
+    });
+  </script>
+</body>
+</html>

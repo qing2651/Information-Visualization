@@ -1,0 +1,129 @@
+{
+  "name": "莱昂纳多·迪卡普里奥",
+  "data": [
+    {
+      "region": "天津市",
+      "value": 100
+    },
+    {
+      "region": "西藏自治区",
+      "value": 75
+    },
+    {
+      "region": "黑龙江省",
+      "value": 66
+    },
+    {
+      "region": "海南省",
+      "value": 42
+    },
+    {
+      "region": "上海市",
+      "value": 39
+    },
+    {
+      "region": "辽宁省",
+      "value": 28
+    },
+    {
+      "region": "湖北省",
+      "value": 28
+    },
+    {
+      "region": "青海省",
+      "value": 28
+    },
+    {
+      "region": "广东省",
+      "value": 28
+    },
+    {
+      "region": "北京市",
+      "value": 27
+    },
+    {
+      "region": "陕西省",
+      "value": 25
+    },
+    {
+      "region": "江西省",
+      "value": 25
+    },
+    {
+      "region": "重庆市",
+      "value": 25
+    },
+    {
+      "region": "江苏省",
+      "value": 25
+    },
+    {
+      "region": "新疆维吾尔自治区",
+      "value": 24
+    },
+    {
+      "region": "湖南省",
+      "value": 23
+    },
+    {
+      "region": "吉林省",
+      "value": 23
+    },
+    {
+      "region": "浙江省",
+      "value": 23
+    },
+    {
+      "region": "四川省",
+      "value": 22
+    },
+    {
+      "region": "安徽省",
+      "value": 21
+    },
+    {
+      "region": "宁夏回族自治区",
+      "value": 21
+    },
+    {
+      "region": "福建省",
+      "value": 19
+    },
+    {
+      "region": "广西壮族自治区",
+      "value": 19
+    },
+    {
+      "region": "云南省",
+      "value": 19
+    },
+    {
+      "region": "山东省",
+      "value": 19
+    },
+    {
+      "region": "河南省",
+      "value": 18
+    },
+    {
+      "region": "山西省",
+      "value": 17
+    },
+    {
+      "region": "甘肃省",
+      "value": 17
+    },
+    {
+      "region": "河北省",
+      "value": 16
+    },
+    {
+      "region": "内蒙古自治区",
+      "value": 16
+    },
+    {
+      "region": "贵州省",
+      "value": 15
+    }
+  ]
+}

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>高级合作关系力导向图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+      color: #2c3e50;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 25px 40px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 20px rgba(0, 100, 200, 0.1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+      background: linear-gradient(to right, #ff7eb3, #ff758c, #ff7eb3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(255, 117, 140, 0.2);
+      font-weight: 800;
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: #5a6b82;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      padding: 25px;
+      gap: 30px;
+      max-width: 1800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    #main {
+      flex: 1;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(140, 180, 255, 0.2);
+      overflow: hidden;
+      border: 1px solid rgba(200, 220, 255, 0.8);
+      position: relative;
+      min-height: 600px;
+    }
+
+    #controls {
+      width: 320px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 35px rgba(140, 180, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      border: 1px solid rgba(200, 220, 255, 0.8);
+      backdrop-filter: blur(5px);
+      overflow-y: auto;
+      max-height: calc(100vh - 100px);
+    }
+
+    .control-group {
+      padding-bottom: 25px;
+      border-bottom: 1px solid rgba(180, 200, 255, 0.3);
+    }
+
+    .control-group h3 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: #ff7eb3;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+    }
+
+    .slider-container {
+      margin-bottom: 18px;
+    }
+
+    .slider-container label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+      color: #4a6582;
+      font-weight: 500;
+    }
+
+    .slider-container input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ff7eb3;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 126, 179, 0.6);
+      border: 2px solid white;
+      transition: all 0.2s;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #ff5d9e;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 14px 16px;
+      background: linear-gradient(to right, #ff9a9e, #fad0c4);
+      color: #5a2a4a;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
+      font-weight: 600;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 154, 158, 0.4);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-alt {
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      color: #2a4a7a;
+    }
+
+    .btn-alt:hover {
+      box-shadow: 0 8px 20px rgba(161, 196, 253, 0.4);
+    }
+
+    .btn-warning {
+      background: linear-gradient(to right, #ffd166, #ffb347);
+      color: #5a3d15;
+    }
+
+    .btn-warning:hover {
+      box-shadow: 0 8px 20px rgba(255, 179, 71, 0.4);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      background: rgba(240, 248, 255, 0.8);
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+
+    .legend-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(140, 180, 255, 0.2);
+    }
+
+    .color-box {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .legend-text {
+      font-size: 1.05rem;
+      color: #4a6582;
+      font-weight: 500;
+    }
+
+    .loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.95);
+      z-index: 100;
+      backdrop-filter: blur(5px);
+      border-radius: 20px;
+    }
+
+    .spinner {
+      width: 70px;
+      height: 70px;
+      border: 6px solid rgba(255, 126, 179, 0.2);
+      border-top: 6px solid #ff7eb3;
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+      margin-bottom: 30px;
+    }
+
+    .loading-text {
+      font-size: 1.5rem;
+      color: #ff7eb3;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .loading-subtext {
+      color: #a1c4fd;
+      margin-top: 15px;
+      max-width: 500px;
+      text-align: center;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      border: 1px solid #ff9a9e;
+      box-shadow: 0 15px 35px rgba(255, 154, 158, 0.3);
+      max-width: 500px;
+      width: 90%;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 1rem;
+      color: #7f8c8d;
+      background: rgba(255, 255, 255, 0.8);
+      border-top: 1px solid rgba(200, 220, 255, 0.8);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 1000px) {
+      .container {
+        flex-direction: column;
+        max-height: none;
+      }
+
+      #controls {
+        width: 100%;
+        max-height: 400px;
+      }
+
+      .legend {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-group {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 滚动条样式 */
+    #controls::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #controls::-webkit-scrollbar-track {
+      background: rgba(200, 220, 255, 0.3);
+      border-radius: 5px;
+    }
+
+    #controls::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #ff9a9e, #fad0c4);
+      border-radius: 5px;
+    }
+
+    #controls::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(to bottom, #ff7eb3, #ff9a9e);
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✨ 合作关系网络图 ✨</h1>
+    <p class="subtitle">可视化人物与电影之间的关系，探索合作网络中的关键节点与连接模式</p>
+  </header>
+
+  <div class="container">
+    <div id="main"></div>
+
+    <div id="controls">
+      <div class="control-group">
+        <h3><span>⚙️</span> 布局参数控制</h3>
+        <div class="slider-container">
+          <label>
+            <span>节点斥力强度</span>
+            <span id="repulsion-value">1000</span>
+          </label>
+          <input type="range" id="repulsion" min="500" max="3000" value="1000" step="100">
+        </div>
+        <div class="slider-container">
+          <label>
+            <span>连线长度</span>
+            <span id="edgeLength-value">200</span>
+          </label>
+          <input type="range" id="edgeLength" min="50" max="300" value="200" step="10">
+        </div>
+        <div class="slider-container">
+          <label>
+            <span>重力强度</span>
+            <span id="gravity-value">0.4</span>
+          </label>
+          <input type="range" id="gravity" min="0" max="0.5" value="0.4" step="0.01">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <h3><span>🔍</span> 标签与显示</h3>
+        <div class="slider-container">
+          <label>
+            <span>标签大小</span>
+            <span id="labelSize-value">14</span>
+          </label>
+          <input type="range" id="labelSize" min="10" max="20" value="14" step="1">
+        </div>
+        <div class="btn-group">
+          <button id="showAllLabels"><span>👁️</span> 显示所有标签</button>
+          <button id="hideLabels"><span>🙈</span> 隐藏标签</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <h3><span>📊</span> 图例说明</h3>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="color-box" style="background: #FF6B6B;"></div>
+            <div class="legend-text">人物节点</div>
+          </div>
+          <div class="legend-item">
+            <div class="color-box" style="background: #4ECDC4;"></div>
+            <div class="legend-text">电影节点</div>
+          </div>
+          <div class="legend-item">
+            <div class="color-box" style="background: #ff7eb3;"></div>
+            <div class="legend-text">人物→电影</div>
+          </div>
+          <div class="legend-item">
+            <div class="color-box" style="background: #FFD166;"></div>
+            <div class="legend-text">人物合作</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <h3><span>🔄</span> 视图操作</h3>
+        <div class="btn-group">
+          <button id="exportBtn" class="btn-alt"><span>💾</span> 导出视图</button>
+          <button id="toggleControls" class="btn-warning"><span>📱</span> 隐藏控制面板</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">正在加载数据，请稍候...</div>
+    <div class="loading-subtext">正在处理节点关系网络，优化可视化效果</div>
+  </div>
+
+  <footer>
+    <p>合作关系力导向图 | 数据可视化 | &copy; 2025 电影关系网络分析</p>
+  </footer>
+
+
+  <script>
+    const chartDom = document.getElementById('main');
+    const myChart = echarts.init(chartDom, 'dark');
+    const loadingEl = document.getElementById('loading');
+
+    //获取DOM元素
+    const repulsionSlider = document.getElementById('repulsion');
+    const edgeLengthSlider = document.getElementById('edgeLength');
+    const gravitySlider = document.getElementById('gravity');
+    const labelSizeSlider = document.getElementById('labelSize');
+
+    const repulsionValue = document.getElementById('repulsion-value');
+    const edgeLengthValue = document.getElementById('edgeLength-value');
+    const gravityValue = document.getElementById('gravity-value');
+    const labelSizeValue = document.getElementById('labelSize-value');
+
+    //初始化显示值
+    repulsionValue.textContent = repulsionSlider.value;
+    edgeLengthValue.textContent = edgeLengthSlider.value;
+    gravityValue.textContent = gravitySlider.value;
+    labelSizeValue.textContent = labelSizeSlider.value;
+
+    //节点类型颜色映射
+    const nodeColors = {
+      person: '#FF6B6B',
+      movie: '#4ECDC4'
+    };
+
+    //关系类型颜色映射
+    const linkColors = {
+      '人物 → 电影': '#ff7eb3',
+      '人物合作': '#FFD166'
+    };
+
+    //加载数据
+    fetch('sankey_all.json')
+      .then(res => res.json())
+      .then(data => {
+        //角色类型名称
+        const roleTypeNames = ['Actor', 'Director', 'Producer', 'Writer', 'Cinematographer', 'Editor'];
+        const roleTypeSet = new Set(roleTypeNames);
+
+        const nodeTypeMap = new Map();
+        const degreeMap = new Map(); //存储连接数
+        const moviePersonMap = new Map(); //存储每部电影对应的人物列表
+
+        //初始化所有节点为人物类型
+        data.nodes.forEach(node => {
+          nodeTypeMap.set(node.name, 'person');
+          degreeMap.set(node.name, 0);
+        });
+
+        //第一遍遍历：标记电影节点并建立电影到人物的映射
+        data.links.forEach(link => {
+          //标记电影节点
+          if (roleTypeSet.has(link.target)) {
+            nodeTypeMap.set(link.source, 'movie');
+          }
+        });
+
+        //第二遍遍历：更新度数
+        data.links.forEach(link => {
+          const sourceType = nodeTypeMap.get(link.source);
+          const targetType = nodeTypeMap.get(link.target);
+
+          //跳过角色节点的链接
+          if (roleTypeSet.has(link.source) || roleTypeSet.has(link.target)) {
+            return;
+          }
+
+          degreeMap.set(link.source, (degreeMap.get(link.source) || 0) + 1);
+          degreeMap.set(link.target, (degreeMap.get(link.target) || 0) + 1);
+
+          //建立电影到人物的映射
+          if (sourceType === 'person' && targetType === 'movie') {
+            if (!moviePersonMap.has(link.target)) {
+              moviePersonMap.set(link.target, []);
+            }
+            moviePersonMap.get(link.target).push(link.source);
+          }
+        });
+
+        //创建节点数据（过滤掉角色节点）
+        const nodes = data.nodes
+          .filter(node => !roleTypeSet.has(node.name))
+          .map(node => {
+            const type = nodeTypeMap.get(node.name) || 'person';
+            const degree = degreeMap.get(node.name) || 1;
+
+            //根据类型和连接数决定节点大小
+            const baseSize = type === 'person' ? 25 : 30;
+            const size = Math.min(baseSize + Math.sqrt(degree) * 4, 50);
+
+            const nodeConfig = {
+              ...node,
+              symbolSize: size,
+              label: {
+                show: degree > 1, //只显示连接数大于1的节点标签
+                fontSize: 14
+              },
+              emphasis: {
+                itemStyle: {
+                  shadowColor: 'rgba(100, 150, 255, 0.6)',
+                  shadowBlur: 20
+                }
+              },
+              itemStyle: { color: nodeColors[type] }
+            };
+
+            nodeConfig.label.color = nodeColors[type];
+            return nodeConfig;
+          });
+
+        //创建关系数据（过滤掉角色节点相关的边）
+        const links = data.links
+          .filter(link =>
+            !roleTypeSet.has(link.source) &&
+            !roleTypeSet.has(link.target)
+          )
+          .map(link => {
+            const sourceType = nodeTypeMap.get(link.source);
+            const targetType = nodeTypeMap.get(link.target);
+
+            let lineColor = linkColors['人物 → 电影'];
+            let category = '人物 → 电影';
+            let lineWidth = 2;
+
+            if (sourceType === 'movie' && targetType === 'person') {
+              // 反转方向
+              return {
+                source: link.target,
+                target: link.source,
+                lineStyle: {
+                  color: lineColor,
+                  width: lineWidth,
+                  opacity: 0.7
+                },
+                emphasis: {
+                  lineStyle: {
+                    width: 4,
+                    opacity: 1
+                  }
+                },
+                category
+              };
+            }
+
+            return {
+              ...link,
+              lineStyle: {
+                color: lineColor,
+                width: lineWidth,
+                opacity: 0.7
+              },
+              emphasis: {
+                lineStyle: {
+                  width: 4,
+                  opacity: 1
+                }
+              },
+              category
+            };
+          });
+
+        //人物合作关系
+        const collaborationLinks = [];
+        const collaborationMap = new Map();
+
+        moviePersonMap.forEach((persons, movie) => {
+          for (let i = 0; i < persons.length; i++) {
+            for (let j = i + 1; j < persons.length; j++) {
+              const p1 = persons[i];
+              const p2 = persons[j];
+              const key = [p1, p2].sort().join('|');
+
+              if (!collaborationMap.has(key)) {
+                collaborationMap.set(key, true);
+
+                //更新度数（每条合作关系边增加两个节点的度数）
+                degreeMap.set(p1, (degreeMap.get(p1) || 0) + 1);
+                degreeMap.set(p2, (degreeMap.get(p2) || 0) + 1);
+
+                collaborationLinks.push({
+                  source: p1,
+                  target: p2,
+                  lineStyle: {
+                    color: linkColors['人物合作'],
+                    width: 2.5,
+                    opacity: 0.7
+                  },
+                  emphasis: {
+                    lineStyle: {
+                      width: 5,
+                      opacity: 1
+                    }
+                  },
+                  category: '人物合作'
+                });
+              }
+            }
+          }
+        });
+
+        //将合作关系添加到links中
+        links.push(...collaborationLinks);
+
+        //设置图表配置
+        const option = {
+          title: {
+            text: '合作关系网络分析',
+            subtext: '节点大小表示连接数量，颜色区分类型',
+            left: 'center',
+            top: 15,
+            textStyle: {
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: '#ff7eb3'
+            },
+            subtextStyle: {
+              fontSize: 16,
+              color: '#5a6b82'
+            }
+          },
+          tooltip: {
+            trigger: 'item',
+            formatter: params => {
+              if (params.dataType === 'node') {
+                const type = nodeTypeMap.get(params.data.name) || '未知';
+                const degree = degreeMap.get(params.data.name) || 0;
+                const typeText = type === 'person' ? '人物' : '电影';
+
+                return `
+                  <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:${params.color}">
+                    ${params.name}
+                  </div>
+                  <div style="margin-bottom:5px;"><b>类型:</b> ${typeText}</div>
+                  <div><b>连接数:</b> ${degree}</div>
+                `;
+              } else if (params.dataType === 'edge') {
+                return `
+                  <div style="font-size:18px;font-weight:bold;margin-bottom:10px;">
+                    关系连接
+                  </div>
+                  <div style="margin-bottom:5px;">${params.data.source} → ${params.data.target}</div>
+                  <div><b>类型:</b> ${params.data.category || '其它'}</div>
+                `;
+              }
+            },
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderColor: '#ff9a9e',
+            borderWidth: 1,
+            textStyle: {
+              color: '#4a6582'
+            },
+            extraCssText: 'box-shadow: 0 0 25px rgba(74, 169, 226, 0.6); border-radius: 10px; padding: 15px;'
+          },
+          legend: {
+            data: ['人物 → 电影', '人物合作'],
+            bottom: 15,
+            textStyle: {
+              color: '#5a6b82',
+              fontSize: 14
+            },
+            itemGap: 20
+          },
+          series: [{
+            type: 'graph',
+            layout: 'force',
+            roam: true,
+            draggable: true,
+            focusNodeAdjacency: true,
+            data: nodes,
+            links: links,
+            categories: [
+              { name: '人物 → 电影' },
+              { name: '人物合作' }
+            ],
+            label: {
+              show: true,
+              position: 'right',
+              formatter: '{b}',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              padding: [6, 12],
+              borderRadius: 8,
+              borderColor: 'rgba(180, 200, 255, 0.5)',
+              borderWidth: 1
+            },
+            lineStyle: {
+              curveness: 0.2,
+              opacity: 0.7
+            },
+            force: {
+              repulsion: 1200,
+              edgeLength: 150,
+              gravity: 0.1,
+              friction: 0.1,
+              layoutAnimation: true
+            }
+          }]
+        };
+
+        myChart.setOption(option);
+        loadingEl.style.display = 'none';
+
+        // 添加事件监听器
+        setupEventListeners(option);
+      })
+      .catch(err => {
+        console.error(err);
+        loadingEl.innerHTML = `
+          <div class="error-panel">
+            <h3 style="color:#ff6b6b; margin-bottom:20px; font-size:1.8rem;">数据加载失败</h3>
+            <p style="margin-bottom:15px; font-size:1.1rem;">请确认 sankey_all.json 文件存在且可访问</p>
+            <p style="margin-bottom:25px; color:#bdc3c7; background:rgba(30,40,50,0.5); padding:15px; border-radius:8px;">错误信息: ${err.message}</p>
+            <button onclick="window.location.reload()" style="
+              padding:12px 30px;
+              background:linear-gradient(to right, #ff6b6b, #e94e77);
+              color:white;
+              border:none;
+              border-radius:10px;
+              cursor:pointer;
+              font-size:1.1rem;
+              transition:all 0.3s;
+              box-shadow:0 4px 15px rgba(233, 78, 119, 0.4);
+            ">
+              重新加载
+            </button>
+          </div>
+        `;
+      });
+
+    //事件监听
+    function setupEventListeners(option) {
+      //滑块
+      repulsionSlider.addEventListener('input', function() {
+        repulsionValue.textContent = this.value;
+        option.series[0].force.repulsion = parseInt(this.value);
+        myChart.setOption(option);
+      });
+
+      edgeLengthSlider.addEventListener('input', function() {
+        edgeLengthValue.textContent = this.value;
+        option.series[0].force.edgeLength = parseInt(this.value);
+        myChart.setOption(option);
+      });
+
+      gravitySlider.addEventListener('input', function() {
+        gravityValue.textContent = this.value;
+        option.series[0].force.gravity = parseFloat(this.value);
+        myChart.setOption(option);
+      });
+
+      labelSizeSlider.addEventListener('input', function() {
+        labelSizeValue.textContent = this.value;
+        option.series[0].label.fontSize = parseInt(this.value);
+        myChart.setOption(option);
+      });
+
+      //按钮
+      document.getElementById('showAllLabels').addEventListener('click', function() {
+        const newNodes = option.series[0].data.map(node => {
+          return {
+            ...node,
+            label: { ...node.label, show: true }
+          };
+        });
+        option.series[0].data = newNodes;
+        myChart.setOption(option);
+      });
+
+      document.getElementById('hideLabels').addEventListener('click', function() {
+        const newNodes = option.series[0].data.map(node => {
+          return {
+            ...node,
+            label: { ...node.label, show: false }
+          };
+        });
+        option.series[0].data = newNodes;
+        myChart.setOption(option);
+      });
+
+      document.getElementById('refreshLayout').addEventListener('click', function() {
+        myChart.dispatchAction({
+          type: 'forceLayout',
+          animation: {
+            duration: 1000,
+            easing: 'cubicInOut'
+          }
+        });
+      });
+
+      document.getElementById('resetView').addEventListener('click', function() {
+        myChart.dispatchAction({
+          type: 'graphRoam',
+          zoom: 1,
+          originX: 0,
+          originY: 0
+        });
+      });
+
+      document.getElementById('highlightHubs').addEventListener('click', function() {
+        //找出度数最高的5个节点
+        const nodeDegrees = option.series[0].data.map(node => ({
+          name: node.name,
+          degree: node.symbolSize
+        }));
+
+        nodeDegrees.sort((a, b) => b.degree - a.degree);
+        const hubNames = nodeDegrees.slice(0, 5).map(n => n.name);
+
+        const newNodes = option.series[0].data.map(node => {
+          const isHub = hubNames.includes(node.name);
+          return {
+            ...node,
+            itemStyle: {
+              ...node.itemStyle,
+              color: isHub ? '#FFD166' : nodeColors[nodeTypeMap.get(node.name)],
+              shadowBlur: isHub ? 25 : 0,
+              shadowColor: isHub ? '#FFD166' : 'transparent'
+            },
+            label: {
+              ...node.label,
+              color: isHub ? '#5a3d15' : node.label.color,
+              fontWeight: 'bold'
+            }
+          };
+        });
+
+        option.series[0].data = newNodes;
+        myChart.setOption(option);
+      });
+
+      document.getElementById('resetHighlights').addEventListener('click', function() {
+        const newNodes = option.series[0].data.map(node => {
+          const type = nodeTypeMap.get(node.name) || 'person';
+          return {
+            ...node,
+            itemStyle: {
+              ...node.itemStyle,
+              color: nodeColors[type],
+              shadowBlur: 0
+            },
+            label: {
+              ...node.label,
+              color: type === 'movie' ? '#2a4a7a' : '#5a2a4a'
+            }
+          };
+        });
+
+        option.series[0].data = newNodes;
+        myChart.setOption(option);
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', function() {
+        const imgData = myChart.getDataURL({
+          type: 'png',
+          pixelRatio: 2,
+          backgroundColor: '#ffffff'
+        });
+
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = '合作关系网络图.png';
+        link.click();
+      });
+
+      document.getElementById('toggleControls').addEventListener('click', function() {
+        const controls = document.getElementById('controls');
+        if (controls.style.display === 'none') {
+          controls.style.display = 'flex';
+          this.innerHTML = '<span>📱</span> 隐藏控制面板';
+        } else {
+          controls.style.display = 'none';
+          this.innerHTML = '<span>📱</span> 显示控制面板';
+        }
+      });
+    }
+
+    //窗口大小变化时重绘图表
+    window.addEventListener('resize', function() {
+      myChart.resize();
+    });
+  </script>
+</body>
+</html>
+
+
+
+

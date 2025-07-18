@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+  <title>Leonardo合作网络</title>
+  <script src="d3.v7.js"></script>
+  <style>
+    body { margin: 0; height: 100%; overflow: hidden; background: #0a192f; }
+    #graph { width: 100%; height: 100%; }
+    .link { stroke: #5d89cf; stroke-opacity: 0.5; }
+    .node { stroke: #172a45; stroke-width: 2px; }
+    .label { font: 13px 'Arial'; fill: #ccd6f6; text-shadow: 0 0 3px rgba(0,0,0,0.3); }
+    .tooltip { 
+      position: absolute; 
+      padding: 10px; 
+      background: rgba(10, 25, 47, 0.9); 
+      color: #ccd6f6; 
+      border-radius: 6px; 
+      border: 1px solid #233554;
+      pointer-events: none;
+      max-width: 250px;
+      font: 12px 'Arial';
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 100;
+    }
+    .star { fill: #ffd700; opacity: 0.8; filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6)); }
+    .star:hover { fill: #fffacd; opacity: 1; filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)); }
+  </style>
+</head>
+<body>
+  <div id="graph"></div>
+
+  <script>
+    d3.json("leonardo_data.json").then(data => {
+      const width = document.getElementById('graph').clientWidth;
+      const height = document.getElementById('graph').clientHeight;
+      const leoName = data.actor_info.name;
+      
+      // 统计演员合作次数
+      const collabCount = {};
+      for (const movie of data.movies) {
+        for (const actor of movie.cast) {
+          const name = actor.name;
+          collabCount[name] = (collabCount[name] || 0) + 1;
+        }
+      }
+      
+      // 分离多次合作和单次合作的演员
+      const multiActors = [];
+      const singleActors = [];
+      
+      for (const [actor, count] of Object.entries(collabCount)) {
+        if (count > 1) {
+          multiActors.push({ name: actor, count });
+        } else {
+          // 找到该演员参与的电影
+          const movie = data.movies.find(m => m.cast.some(a => a.name === actor));
+          singleActors.push({ 
+            name: actor, 
+            movie: { 
+              title: movie ? movie.title : "未知",
+              year: movie ? movie.release_date.split('-')[0] : "未知"
+            }
+          });
+        }
+      }
+
+      // 准备主网络数据
+      const nodes = [{id: leoName, group: 0, size: 30}];
+      const links = [];
+      
+      for (const actor of multiActors) {
+        nodes.push({id: actor.name, group: actor.count, size: 12 + actor.count * 2});
+        links.push({source: leoName, target: actor.name, value: actor.count});
+      }
+
+      // 与星空背景协调的9种过渡颜色（从深蓝到亮粉）
+     const colorPalette = [
+  "#FFDD00", // 明亮的黄色，代表星星
+  "#FFAA00", // 橙黄色
+  "#FF7F50", // 珊瑚色
+  "#FFA07A", // 浅珊瑚色
+  "#FFE135", // 金色
+  "#FFFF66", // 柠檬色
+  "#87CEFA", // 天蓝色
+  "#00CED1", // 深天蓝
+  "#BA55D3"  // 紫色调，避免过深
+];
+      
+      const getColor = (count) => {
+        // 将合作次数(2-10)映射到颜色数组索引(0-8)
+        const minCount = 2;
+        const maxCount = 10;
+        const index = Math.min(
+          Math.max(0, Math.floor(((count - minCount) / (maxCount - minCount)) * (colorPalette.length - 1))),
+          colorPalette.length - 1
+        );
+        return colorPalette[index];
+      };
+
+      // 创建SVG
+      const svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
+      
+      // 添加星空背景层（底层）
+      const starsLayer = svg.append("g").attr("class", "stars");
+      
+      // 添加主网络层（上层）
+      const mainLayer = svg.append("g").attr("class", "main-network");
+      
+      // 添加缩放功能
+      svg.call(d3.zoom().scaleExtent([0.3, 3]).on("zoom", (e) => mainLayer.attr("transform", e.transform)));
+
+      // 生成星空背景
+      const stars = singleActors.map(actor => ({
+        id: actor.name,
+        x: Math.random() * width,
+        y: Math.random() * height,
+        movie: actor.movie
+      }));
+      
+      // 绘制星星
+      const starNodes = starsLayer.selectAll(".star")
+        .data(stars)
+        .enter()
+        .append("circle")
+        .attr("class", "star")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 1.5)
+        .attr("vector-effect", "non-scaling-stroke"); // 确保缩放时星星大小不变
+
+      // 星星的悬停提示
+      const starTooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("display", "none");
+      
+      starNodes.on("mouseover", (e, d) => {
+        starTooltip.html(`
+          <strong>${d.id}</strong><br>
+          合作次数：1次<br>
+          合作电影：${d.movie.title}<br>
+          年份：${d.movie.year}
+        `)
+        .style("left", e.pageX + 10 + "px")
+        .style("top", e.pageY - 20 + "px")
+        .style("display", "block");
+      })
+      .on("mousemove", (e) => {
+        starTooltip.style("left", e.pageX + 10 + "px")
+                   .style("top", e.pageY - 20 + "px");
+      })
+      .on("mouseout", () => {
+        starTooltip.style("display", "none");
+      });
+
+      // 创建主网络的力导向图
+      const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(d => 120 + d.value * 15))
+        .force("charge", d3.forceManyBody().strength(-800))
+        .force("center", d3.forceCenter(width/2, height/2))
+        .force("collision", d3.forceCollide().radius(d => d.size + 15));
+
+      // 绘制连接线
+      const link = mainLayer.append("g").selectAll("line")
+        .data(links).enter().append("line")
+        .attr("class", "link")
+        .attr("stroke-width", d => d.value * 0.7);
+
+      // 绘制节点
+      const node = mainLayer.append("g").selectAll("circle")
+        .data(nodes).enter().append("circle")
+        .attr("class", "node")
+        .attr("r", d => d.size)
+        .attr("fill", d => d.group === 0 ? "#ff758f" : getColor(d.group))
+        .attr("filter", "drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))")
+        .call(d3.drag()
+          .on("start", (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+          .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+          .on("end", (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+      // 节点标签
+      const label = mainLayer.append("g").selectAll("text")
+        .data(nodes).enter().append("text")
+        .attr("class", "label")
+        .text(d => d.id)
+        .attr("dx", d => d.size + 5)
+        .attr("dy", 4);
+
+      // 主网络节点的悬停提示
+      const tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("display", "none");
+
+      node.on("mouseover", (e, d) => {
+        if (d.group === 0) return;
+        
+        const collabTimes = d.group;
+        const movies = data.movies
+          .filter(m => m.cast.some(a => a.name === d.id))
+          .map(m => `<li>${m.title} (${m.release_date.split('-')[0]})</li>`);
+        
+        tooltip.html(`
+          <strong style="font-size:14px;">${d.id}</strong><br>
+          合作次数: <strong>${collabTimes}次</strong><br>
+          共同出演影片:<br>
+          <ul style="margin:5px 0 0 0; padding-left:20px;">${movies.join('')}</ul>
+        `)
+        .style("left", e.pageX + 10 + "px")
+        .style("top", e.pageY - 20 + "px")
+        .style("display", "block");
+      })
+      .on("mousemove", (e) => {
+        tooltip.style("left", e.pageX + 10 + "px")
+               .style("top", e.pageY - 20 + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("display", "none");
+      });
+
+      // 更新力导向图布局
+      simulation.on("tick", () => {
+        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+        node.attr("cx", d => d.x).attr("cy", d => d.y);
+        label.attr("x", d => d.x).attr("y", d => d.y);
+      });
+
+    }).catch(e => console.error("加载失败:", e));
+  </script>
+</body>
+</html>
